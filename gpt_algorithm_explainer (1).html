@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT Algorithm Step-by-Step Explainer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .step-container {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #667eea;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .step-description {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .example-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .math-formula {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Times New Roman', serif;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-buttons {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 1000px;
+            }
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .interactive-demo {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .demo-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .demo-output {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 50px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 GPT Algorithm Explainer</h1>
+            <p>Understanding Generative Pre-trained Transformers Step by Step</p>
+        </div>
+
+        <div class="step-container">
+            <!-- Step 1: Tokenization -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(1)">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Tokenization</div>
+                    <button class="toggle-btn" id="toggle-1">▼</button>
+                </div>
+                <div class="step-content" id="content-1">
+                    <div class="step-description">
+                        The first step in GPT is <span class="highlight">tokenization</span> - breaking down input text into smaller units called tokens. These tokens can be words, subwords, or even characters, depending on the tokenization method used.
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">🔍 Example</div>
+                        Input: "Hello world!"<br>
+                        Tokens: ["Hello", " world", "!"]
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Python implementation of basic tokenization
+import re
+from typing import List
+
+class SimpleTokenizer:
+    def __init__(self):
+        self.vocab = {}
+        self.token_to_id = {}
+        self.id_to_token = {}
+        
+    def tokenize(self, text: str) -> List[str]:
+        """Basic tokenization splitting on whitespace and punctuation"""
+        # Simple regex pattern for tokenization
+        pattern = r'\w+|[^\w\s]'
+        tokens = re.findall(pattern, text.lower())
+        return tokens
+    
+    def encode(self, text: str) -> List[int]:
+        """Convert text to token IDs"""
+        tokens = self.tokenize(text)
+        return [self.token_to_id.get(token, 0) for token in tokens]  # 0 for unknown
+    
+    def decode(self, token_ids: List[int]) -> str:
+        """Convert token IDs back to text"""
+        tokens = [self.id_to_token.get(id, '[UNK]') for id in token_ids]
+        return ' '.join(tokens)
+
+# Example usage
+tokenizer = SimpleTokenizer()
+text = "Hello world! How are you today?"
+tokens = tokenizer.tokenize(text)
+print(f"Original: {text}")
+print(f"Tokens: {tokens}")
+</pre>
+                    </div>
+
+                    <div class="interactive-demo">
+                        <h4>🎯 Try it yourself:</h4>
+                        <input type="text" class="demo-input" id="tokenize-input" placeholder="Enter text to tokenize..." value="Hello world! How are you?">
+                        <button class="nav-btn" onclick="demonstrateTokenization()">Tokenize</button>
+                        <div class="demo-output" id="tokenize-output">Tokens will appear here...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Embedding -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(2)">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Token Embeddings</div>
+                    <button class="toggle-btn" id="toggle-2">▼</button>
+                </div>
+                <div class="step-content" id="content-2">
+                    <div class="step-description">
+                        Each token is converted into a <span class="highlight">dense vector representation</span> called an embedding. These embeddings capture semantic meaning and are learned during training.
+                    </div>
+
+                    <div class="math-formula">
+                        E = Embedding_Matrix[token_id]<br>
+                        where E ∈ ℝ^d (d = embedding dimension)
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">🔍 Example</div>
+                        Token "hello" → [0.1, -0.3, 0.8, 0.2, -0.5, ...] (768 dimensions in GPT-2)
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Token Embedding Implementation
+import numpy as np
+import torch
+import torch.nn as nn
+
+class TokenEmbedding(nn.Module):
+    def __init__(self, vocab_size: int, embed_dim: int):
+        super().__init__()
+        self.vocab_size = vocab_size
+        self.embed_dim = embed_dim
+        # Initialize embedding matrix with random values
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        
+    def forward(self, token_ids: torch.Tensor) -> torch.Tensor:
+        """Convert token IDs to embeddings"""
+        return self.embedding(token_ids)
+
+# Example usage
+vocab_size = 50000  # Size of vocabulary
+embed_dim = 768     # Embedding dimension (GPT-2 base)
+
+embedding_layer = TokenEmbedding(vocab_size, embed_dim)
+
+# Example token IDs
+token_ids = torch.tensor([15496, 995, 0])  # ["hello", "world", "!"]
+embeddings = embedding_layer(token_ids)
+
+print(f"Token IDs shape: {token_ids.shape}")
+print(f"Embeddings shape: {embeddings.shape}")
+print(f"First token embedding (first 10 dims): {embeddings[0][:10]}")
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Positional Encoding -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(3)">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Positional Encoding</div>
+                    <button class="toggle-btn" id="toggle-3">▼</button>
+                </div>
+                <div class="step-content" id="content-3">
+                    <div class="step-description">
+                        Since transformers don't have inherent sequence order understanding, <span class="highlight">positional encodings</span> are added to embeddings to give the model information about token positions.
+                    </div>
+
+                    <div class="math-formula">
+                        PE(pos, 2i) = sin(pos / 10000^(2i/d))<br>
+                        PE(pos, 2i+1) = cos(pos / 10000^(2i/d))
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">🔍 Example</div>
+                        Position 0: [0.0, 1.0, 0.0, 1.0, ...]<br>
+                        Position 1: [0.841, 0.540, 0.099, 0.995, ...]
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Positional Encoding Implementation
+import math
+import torch
+import torch.nn as nn
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, embed_dim: int, max_seq_len: int = 1024):
+        super().__init__()
+        self.embed_dim = embed_dim
+        
+        # Create positional encoding matrix
+        pe = torch.zeros(max_seq_len, embed_dim)
+        position = torch.arange(0, max_seq_len).unsqueeze(1).float()
+        
+        # Create division term for sinusoidal pattern
+        div_term = torch.exp(torch.arange(0, embed_dim, 2).float() * 
+                           -(math.log(10000.0) / embed_dim))
+        
+        # Apply sin to even indices
+        pe[:, 0::2] = torch.sin(position * div_term)
+        # Apply cos to odd indices
+        pe[:, 1::2] = torch.cos(position * div_term)
+        
+        # Register as buffer (not a parameter)
+        self.register_buffer('pe', pe.unsqueeze(0))
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Add positional encoding to embeddings"""
+        seq_len = x.size(1)
+        return x + self.pe[:, :seq_len]
+
+# Example usage
+embed_dim = 768
+pos_encoding = PositionalEncoding(embed_dim)
+
+# Simulate token embeddings
+batch_size, seq_len = 2, 10
+embeddings = torch.randn(batch_size, seq_len, embed_dim)
+
+# Add positional encoding
+pos_embeddings = pos_encoding(embeddings)
+
+print(f"Original embeddings shape: {embeddings.shape}")
+print(f"With positional encoding shape: {pos_embeddings.shape}")
+print(f"Positional encoding for position 0 (first 10 dims): {pos_encoding.pe[0, 0, :10]}")
+print(f"Positional encoding for position 1 (first 10 dims): {pos_encoding.pe[0, 1, :10]}")
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Multi-Head Attention -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(4)">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Multi-Head Self-Attention</div>
+                    <button class="toggle-btn" id="toggle-4">▼</button>
+                </div>
+                <div class="step-content" id="content-4">
+                    <div class="step-description">
+                        The core of the transformer architecture. <span class="highlight">Self-attention</span> allows each token to attend to all other tokens in the sequence, learning complex relationships and dependencies.
+                    </div>
+
+                    <div class="math-formula">
+                        Attention(Q,K,V) = softmax(QK^T / √d_k)V<br>
+                        MultiHead(Q,K,V) = Concat(head₁, ..., head_h)W^O
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">🔍 Example</div>
+                        In "The cat sat on the mat", when processing "sat":<br>
+                        - High attention to "cat" (subject)<br>
+                        - Medium attention to "mat" (object)<br>
+                        - Low attention to "the" (less relevant)
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Multi-Head Attention Implementation
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import math
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, embed_dim: int, num_heads: int):
+        super().__init__()
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.head_dim = embed_dim // num_heads
+        
+        assert embed_dim % num_heads == 0, "embed_dim must be divisible by num_heads"
+        
+        # Linear projections for Q, K, V
+        self.query = nn.Linear(embed_dim, embed_dim)
+        self.key = nn.Linear(embed_dim, embed_dim)
+        self.value = nn.Linear(embed_dim, embed_dim)
+        self.output = nn.Linear(embed_dim, embed_dim)
+        
+        self.scale = math.sqrt(self.head_dim)
+        
+    def forward(self, x: torch.Tensor, mask=None) -> torch.Tensor:
+        batch_size, seq_len, embed_dim = x.shape
+        
+        # Generate Q, K, V
+        Q = self.query(x)  # (batch, seq_len, embed_dim)
+        K = self.key(x)
+        V = self.value(x)
+        
+        # Reshape for multi-head attention
+        Q = Q.view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+        K = K.view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+        V = V.view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+        
+        # Calculate attention scores
+        scores = torch.matmul(Q, K.transpose(-2, -1)) / self.scale
+        
+        # Apply causal mask for GPT (prevent looking at future tokens)
+        if mask is not None:
+            scores.masked_fill_(mask == 0, -1e9)
+        
+        # Apply softmax
+        attention_weights = F.softmax(scores, dim=-1)
+        
+        # Apply attention to values
+        attended = torch.matmul(attention_weights, V)
+        
+        # Reshape back
+        attended = attended.transpose(1, 2).contiguous().view(
+            batch_size, seq_len, embed_dim
+        )
+        
+        # Final linear projection
+        output = self.output(attended)
+        
+        return output, attention_weights
+
+# Example usage
+embed_dim = 768
+num_heads = 12
+attention = MultiHeadAttention(embed_dim, num_heads)
+
+# Create causal mask for GPT
+def create_causal_mask(seq_len):
+    mask = torch.tril(torch.ones(seq_len, seq_len))
+    return mask.unsqueeze(0).unsqueeze(0)  # Add batch and head dimensions
+
+# Example input
+batch_size, seq_len = 2, 8
+x = torch.randn(batch_size, seq_len, embed_dim)
+mask = create_causal_mask(seq_len)
+
+output, attention_weights = attention(x, mask)
+
+print(f"Input shape: {x.shape}")
+print(f"Output shape: {output.shape}")
+print(f"Attention weights shape: {attention_weights.shape}")
+print(f"Attention weights for first head, first batch, token 3: {attention_weights[0, 0, 3, :]}")
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Feed Forward Network -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(5)">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Feed-Forward Network</div>
+                    <button class="toggle-btn" id="toggle-5">▼</button>
+                </div>
+                <div class="step-content" id="content-5">
+                    <div class="step-description">
+                        After attention, each token passes through a <span class="highlight">position-wise feed-forward network</span>. This adds non-linearity and allows the model to process the attended information.
+                    </div>
+
+                    <div class="math-formula">
+                        FFN(x) = max(0, xW₁ + b₁)W₂ + b₂<br>
+                        where W₁ ∈ ℝ^(d×4d), W₂ ∈ ℝ^(4d×d)
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Feed-Forward Network Implementation
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class FeedForward(nn.Module):
+    def __init__(self, embed_dim: int, ff_dim: int = None, dropout: float = 0.1):
+        super().__init__()
+        if ff_dim is None:
+            ff_dim = 4 * embed_dim  # Standard is 4x the embedding dimension
+            
+        self.linear1 = nn.Linear(embed_dim, ff_dim)
+        self.linear2 = nn.Linear(ff_dim, embed_dim)
+        self.dropout = nn.Dropout(dropout)
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply feed-forward transformation"""
+        # First linear layer with ReLU activation
+        x = F.relu(self.linear1(x))
+        x = self.dropout(x)
+        
+        # Second linear layer
+        x = self.linear2(x)
+        
+        return x
+
+# Example usage
+embed_dim = 768
+ff_dim = 3072  # 4 * embed_dim for GPT-2
+
+feed_forward = FeedForward(embed_dim, ff_dim)
+
+# Example input (batch_size=2, seq_len=8, embed_dim=768)
+x = torch.randn(2, 8, embed_dim)
+output = feed_forward(x)
+
+print(f"Input shape: {x.shape}")
+print(f"Output shape: {output.shape}")
+print(f"Feed-forward parameters: {sum(p.numel() for p in feed_forward.parameters()):,}")
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Layer Normalization & Residual -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(6)">
+                    <div class="step-number">6</div>
+                    <div class="step-title">Layer Normalization & Residual Connections</div>
+                    <button class="toggle-btn" id="toggle-6">▼</button>
+                </div>
+                <div class="step-content" id="content-6">
+                    <div class="step-description">
+                        <span class="highlight">Residual connections</span> and <span class="highlight">layer normalization</span> help with training stability and gradient flow in deep networks. The residual connection allows information to flow directly from input to output.
+                    </div>
+
+                    <div class="math-formula">
+                        LayerNorm(x) = γ ⊙ (x - μ)/σ + β<br>
+                        Output = LayerNorm(x + Sublayer(x))
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Transformer Block with Layer Norm and Residual Connections
+import torch
+import torch.nn as nn
+
+class TransformerBlock(nn.Module):
+    def __init__(self, embed_dim: int, num_heads: int, ff_dim: int = None, dropout: float = 0.1):
+        super().__init__()
+        self.embed_dim = embed_dim
+        
+        # Multi-head attention
+        self.attention = MultiHeadAttention(embed_dim, num_heads)
+        
+        # Feed-forward network
+        if ff_dim is None:
+            ff_dim = 4 * embed_dim
+        self.feed_forward = FeedForward(embed_dim, ff_dim, dropout)
+        
+        # Layer normalizations
+        self.ln1 = nn.LayerNorm(embed_dim)
+        self.ln2 = nn.LayerNorm(embed_dim)
+        
+        # Dropout
+        self.dropout = nn.Dropout(dropout)
+        
+    def forward(self, x: torch.Tensor, mask=None) -> torch.Tensor:
+        """Forward pass through transformer block"""
+        
+        # Self-attention with residual connection and layer norm
+        # GPT uses pre-norm: LayerNorm -> Attention -> Residual
+        attn_input = self.ln1(x)
+        attn_output, _ = self.attention(attn_input, mask)
+        attn_output = self.dropout(attn_output)
+        x = x + attn_output  # Residual connection
+        
+        # Feed-forward with residual connection and layer norm
+        ff_input = self.ln2(x)
+        ff_output = self.feed_forward(ff_input)
+        ff_output = self.dropout(ff_output)
+        x = x + ff_output  # Residual connection
+        
+        return x
+
+# Example usage
+embed_dim = 768
+num_heads = 12
+ff_dim = 3072
+
+transformer_block = TransformerBlock(embed_dim, num_heads, ff_dim)
+
+# Create input and causal mask
+batch_size, seq_len = 2, 8
+x = torch.randn(batch_size, seq_len, embed_dim)
+mask = create_causal_mask(seq_len)
+
+# Forward pass
+output = transformer_block(x, mask)
+
+print(f"Input shape: {x.shape}")
+print(f"Output shape: {output.shape}")
+print(f"Parameters in transformer block: {sum(p.numel() for p in transformer_block.parameters()):,}")
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: Stacking Layers -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(7)">
+                    <div class="step-number">7</div>
+                    <div class="step-title">Stacking Multiple Layers</div>
+                    <button class="toggle-btn" id="toggle-7">▼</button>
+                </div>
+                <div class="step-content" id="content-7">
+                    <div class="step-description">
+                        GPT models stack multiple transformer blocks to create depth. Each layer can capture increasingly complex patterns and relationships. GPT-2 has 12-48 layers, GPT-3 has 96 layers.
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">📊 Model Sizes</div>
+                        GPT-2 Small: 12 layers, 768 dims, 12 heads<br>
+                        GPT-2 Medium: 24 layers, 1024 dims, 16 heads<br>
+                        GPT-2 Large: 36 layers, 1280 dims, 20 heads<br>
+                        GPT-3: 96 layers, 12288 dims, 96 heads
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Complete GPT Model Implementation
+import torch
+import torch.nn as nn
+
+class GPTModel(nn.Module):
+    def __init__(
+        self, 
+        vocab_size: int,
+        embed_dim: int = 768,
+        num_layers: int = 12,
+        num_heads: int = 12,
+        max_seq_len: int = 1024,
+        dropout: float = 0.1
+    ):
+        super().__init__()
+        self.vocab_size = vocab_size
+        self.embed_dim = embed_dim
+        self.max_seq_len = max_seq_len
+        
+        # Token embeddings
+        self.token_embedding = nn.Embedding(vocab_size, embed_dim)
+        
+        # Positional embeddings (learned, not sinusoidal in GPT)
+        self.pos_embedding = nn.Embedding(max_seq_len, embed_dim)
+        
+        # Transformer blocks
+        self.layers = nn.ModuleList([
+            TransformerBlock(embed_dim, num_heads, 4 * embed_dim, dropout)
+            for _ in range(num_layers)
+        ])
+        
+        # Final layer norm
+        self.ln_final = nn.LayerNorm(embed_dim)
+        
+        # Language modeling head
+        self.lm_head = nn.Linear(embed_dim, vocab_size, bias=False)
+        
+        # Initialize weights
+        self.apply(self._init_weights)
+        
+    def _init_weights(self, module):
+        """Initialize weights following GPT-2 paper"""
+        if isinstance(module, (nn.Linear, nn.Embedding)):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if isinstance(module, nn.Linear) and module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+                
+    def forward(self, input_ids: torch.Tensor) -> torch.Tensor:
+        """Forward pass through GPT model"""
+        batch_size, seq_len = input_ids.shape
+        
+        # Create position indices
+        pos_ids = torch.arange(0, seq_len, dtype=torch.long, device=input_ids.device)
+        pos_ids = pos_ids.unsqueeze(0).expand(batch_size, seq_len)
+        
+        # Get embeddings
+        token_embeds = self.token_embedding(input_ids)
+        pos_embeds = self.pos_embedding(pos_ids)
+        x = token_embeds + pos_embeds
+        
+        # Create causal mask
+        mask = torch.tril(torch.ones(seq_len, seq_len, device=input_ids.device))
+        mask = mask.unsqueeze(0).unsqueeze(0)
+        
+        # Pass through transformer layers
+        for layer in self.layers:
+            x = layer(x, mask)
+            
+        # Final layer norm
+        x = self.ln_final(x)
+        
+        # Language modeling head
+        logits = self.lm_head(x)
+        
+        return logits
+
+# Example usage - GPT-2 Small configuration
+vocab_size = 50257  # GPT-2 tokenizer vocab size
+model = GPTModel(
+    vocab_size=vocab_size,
+    embed_dim=768,
+    num_layers=12,
+    num_heads=12,
+    max_seq_len=1024
+)
+
+# Example forward pass
+batch_size, seq_len = 2, 10
+input_ids = torch.randint(0, vocab_size, (batch_size, seq_len))
+logits = model(input_ids)
+
+print(f"Model parameters: {sum(p.numel() for p in model.parameters()):,}")
+print(f"Input shape: {input_ids.shape}")
+print(f"Output logits shape: {logits.shape}")
+print(f"Logits represent probability distribution over {vocab_size} tokens")
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8: Output Layer -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(8)">
+                    <div class="step-number">8</div>
+                    <div class="step-title">Output Layer & Next Token Prediction</div>
+                    <button class="toggle-btn" id="toggle-8">▼</button>
+                </div>
+                <div class="step-content" id="content-8">
+                    <div class="step-description">
+                        The final step converts the transformer's hidden states into <span class="highlight">probability distributions</span> over the vocabulary. The model predicts the most likely next token using softmax activation.
+                    </div>
+
+                    <div class="math-formula">
+                        P(token_i) = softmax(W_output · h + b)_i<br>
+                        next_token = argmax(P(token_i))
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">🔍 Example</div>
+                        Input: "The cat sat on the"<br>
+                        Top predictions: "mat" (0.3), "floor" (0.2), "chair" (0.15)
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Text Generation Implementation
+import torch
+import torch.nn.functional as F
+
+class TextGenerator:
+    def __init__(self, model, tokenizer):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.model.eval()
+        
+    def generate(
+        self, 
+        prompt: str, 
+        max_length: int = 50, 
+        temperature: float = 1.0,
+        top_k: int = 50,
+        do_sample: bool = True
+    ) -> str:
+        """Generate text using the GPT model"""
+        
+        # Tokenize input
+        input_ids = torch.tensor([self.tokenizer.encode(prompt)])
+        
+        with torch.no_grad():
+            for _ in range(max_length):
+                # Forward pass
+                logits = self.model(input_ids)
+                
+                # Get logits for last token
+                next_token_logits = logits[0, -1, :] / temperature
+                
+                # Apply top-k filtering
+                if top_k > 0:
+                    top_k_logits, top_k_indices = torch.topk(next_token_logits, top_k)
+                    next_token_logits = torch.full_like(next_token_logits, -float('inf'))
+                    next_token_logits[top_k_indices] = top_k_logits
+                
+                # Convert to probabilities
+                probs = F.softmax(next_token_logits, dim=-1)
+                
+                # Sample next token
+                if do_sample:
+                    next_token = torch.multinomial(probs, num_samples=1)
+                else:
+                    next_token = torch.argmax(probs, keepdim=True)
+                
+                # Append to sequence
+                input_ids = torch.cat([input_ids, next_token.unsqueeze(0)], dim=1)
+                
+                # Stop if EOS token
+                if next_token.item() == self.tokenizer.eos_token_id:
+                    break
+                    
+                # Prevent infinite generation
+                if input_ids.shape[1] > 1024:
+                    break
+        
+        # Decode generated text
+        generated_text = self.tokenizer.decode(input_ids[0].tolist())
+        return generated_text
+
+# Demonstration of different sampling strategies
+def demonstrate_sampling_strategies():
+    """Show different ways to sample from the model output"""
+    
+    # Simulate model logits for vocabulary of size 10
+    logits = torch.tensor([2.0, 1.5, 1.0, 0.5, 0.2, 0.1, 0.0, -0.5, -1.0, -2.0])
+    
+    print("Different Sampling Strategies:")
+    print(f"Logits: {logits}")
+    
+    # 1. Greedy decoding (temperature = 0, equivalent)
+    greedy = torch.argmax(logits)
+    print(f"Greedy: token {greedy} (always picks highest)")
+    
+    # 2. Temperature sampling
+    for temp in [0.5, 1.0, 2.0]:
+        probs = F.softmax(logits / temp, dim=-1)
+        sample = torch.multinomial(probs, 1)
+        print(f"Temperature {temp}: token {sample.item()}, prob dist: {probs[:5]}")
+    
+    # 3. Top-k sampling
+    top_k = 3
+    top_k_logits, top_k_indices = torch.topk(logits, top_k)
+    filtered_logits = torch.full_like(logits, -float('inf'))
+    filtered_logits[top_k_indices] = top_k_logits
+    probs = F.softmax(filtered_logits, dim=-1)
+    sample = torch.multinomial(probs, 1)
+    print(f"Top-k ({top_k}): token {sample.item()}, only considers top {top_k} tokens")
+
+# Run demonstration
+demonstrate_sampling_strategies()
+</pre>
+                    </div>
+
+                    <div class="interactive-demo">
+                        <h4>🎯 Try different sampling strategies:</h4>
+                        <select id="sampling-strategy">
+                            <option value="greedy">Greedy (always pick highest)</option>
+                            <option value="temperature">Temperature Sampling</option>
+                            <option value="top-k">Top-k Sampling</option>
+                        </select>
+                        <button class="nav-btn" onclick="demonstrateSampling()">Generate</button>
+                        <div class="demo-output" id="sampling-output">Results will appear here...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 9: Training Process -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(9)">
+                    <div class="step-number">9</div>
+                    <div class="step-title">Training Process</div>
+                    <button class="toggle-btn" id="toggle-9">▼</button>
+                </div>
+                <div class="step-content" id="content-9">
+                    <div class="step-description">
+                        GPT is trained using <span class="highlight">autoregressive language modeling</span> - predicting the next token given previous tokens. The model learns from massive text datasets to understand language patterns.
+                    </div>
+
+                    <div class="math-formula">
+                        Loss = -∑ log P(token_i | token_1, ..., token_{i-1})<br>
+                        Minimize cross-entropy loss across all positions
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">📚 Training Example</div>
+                        Text: "The cat sat on the mat"<br>
+                        Targets: ["cat", "sat", "on", "the", "mat", "&lt;EOS&gt;"]<br>
+                        Model learns: P("cat"|"The"), P("sat"|"The cat"), etc.
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Training Loop Implementation
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader
+
+class GPTTrainer:
+    def __init__(self, model, tokenizer, device='cpu'):
+        self.model = model.to(device)
+        self.tokenizer = tokenizer
+        self.device = device
+        self.criterion = nn.CrossEntropyLoss(ignore_index=-100)
+        
+    def train_step(self, batch, optimizer):
+        """Single training step"""
+        self.model.train()
+        
+        # Move batch to device
+        input_ids = batch['input_ids'].to(self.device)
+        
+        # Create targets (shift input_ids by one position)
+        targets = input_ids[:, 1:].contiguous()
+        input_ids = input_ids[:, :-1]
+        
+        # Forward pass
+        logits = self.model(input_ids)
+        
+        # Reshape for loss calculation
+        batch_size, seq_len, vocab_size = logits.shape
+        logits = logits.view(-1, vocab_size)
+        targets = targets.view(-1)
+        
+        # Calculate loss
+        loss = self.criterion(logits, targets)
+        
+        # Backward pass
+        optimizer.zero_grad()
+        loss.backward()
+        
+        # Gradient clipping (important for transformer training)
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+        
+        # Update weights
+        optimizer.step()
+        
+        return loss.item()
+    
+    def train_epoch(self, dataloader, optimizer):
+        """Train for one epoch"""
+        total_loss = 0
+        num_batches = 0
+        
+        for batch in dataloader:
+            loss = self.train_step(batch, optimizer)
+            total_loss += loss
+            num_batches += 1
+            
+            if num_batches % 100 == 0:
+                avg_loss = total_loss / num_batches
+                print(f"Batch {num_batches}, Average Loss: {avg_loss:.4f}")
+        
+        return total_loss / num_batches
+    
+    def calculate_perplexity(self, dataloader):
+        """Calculate perplexity on validation set"""
+        self.model.eval()
+        total_loss = 0
+        num_tokens = 0
+        
+        with torch.no_grad():
+            for batch in dataloader:
+                input_ids = batch['input_ids'].to(self.device)
+                targets = input_ids[:, 1:].contiguous()
+                input_ids = input_ids[:, :-1]
+                
+                logits = self.model(input_ids)
+                
+                # Calculate loss
+                batch_size, seq_len, vocab_size = logits.shape
+                logits = logits.view(-1, vocab_size)
+                targets = targets.view(-1)
+                
+                loss = self.criterion(logits, targets)
+                total_loss += loss.item() * targets.numel()
+                num_tokens += targets.numel()
+        
+        avg_loss = total_loss / num_tokens
+        perplexity = torch.exp(torch.tensor(avg_loss))
+        return perplexity.item()
+
+# Example training setup
+def setup_training():
+    """Example of how to set up GPT training"""
+    
+    # Model configuration
+    config = {
+        'vocab_size': 50257,
+        'embed_dim': 768,
+        'num_layers': 12,
+        'num_heads': 12,
+        'max_seq_len': 1024,
+        'dropout': 0.1
+    }
+    
+    # Initialize model
+    model = GPTModel(**config)
+    
+    # Optimizer (AdamW is commonly used)
+    optimizer = optim.AdamW(
+        model.parameters(),
+        lr=6e-4,  # Learning rate from GPT-2 paper
+        betas=(0.9, 0.95),
+        weight_decay=0.1
+    )
+    
+    # Learning rate scheduler
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, 
+        T_max=1000,  # Number of steps for cosine annealing
+        eta_min=6e-5  # Minimum learning rate
+    )
+    
+    print(f"Model parameters: {sum(p.numel() for p in model.parameters()):,}")
+    print(f"Training setup complete")
+    
+    return model, optimizer, scheduler
+
+# Data preprocessing example
+class TextDataset(torch.utils.data.Dataset):
+    def __init__(self, texts, tokenizer, max_length=512):
+        self.texts = texts
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+    
+    def __len__(self):
+        return len(self.texts)
+    
+    def __getitem__(self, idx):
+        text = self.texts[idx]
+        
+        # Tokenize and truncate
+        tokens = self.tokenizer.encode(text)[:self.max_length]
+        
+        # Pad if necessary
+        if len(tokens) < self.max_length:
+            tokens.extend([self.tokenizer.pad_token_id] * (self.max_length - len(tokens)))
+        
+        return {'input_ids': torch.tensor(tokens, dtype=torch.long)}
+
+# Setup demonstration
+model, optimizer, scheduler = setup_training()
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 10: Inference & Applications -->
+            <div class="step">
+                <div class="step-header" onclick="toggleStep(10)">
+                    <div class="step-number">10</div>
+                    <div class="step-title">Inference & Applications</div>
+                    <button class="toggle-btn" id="toggle-10">▼</button>
+                </div>
+                <div class="step-content" id="content-10">
+                    <div class="step-description">
+                        Once trained, GPT can be used for various applications: text generation, completion, question answering, summarization, translation, and more through <span class="highlight">prompt engineering</span>.
+                    </div>
+
+                    <div class="example-box">
+                        <div class="example-title">🚀 Applications</div>
+                        • Text Generation: Creative writing, stories<br>
+                        • Code Generation: Programming assistance<br>
+                        • Question Answering: Information retrieval<br>
+                        • Summarization: Document summarization<br>
+                        • Translation: Language translation
+                    </div>
+
+                    <div class="code-block">
+                        <pre># Complete GPT Inference Pipeline
+class GPTInference:
+    def __init__(self, model_path: str):
+        # Load pre-trained model and tokenizer
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = self.load_model(model_path)
+        self.tokenizer = self.load_tokenizer()
+        
+    def load_model(self, model_path):
+        """Load pre-trained GPT model"""
+        model = GPTModel(vocab_size=50257, embed_dim=768, num_layers=12, num_heads=12)
+        # model.load_state_dict(torch.load(model_path, map_location=self.device))
+        model.to(self.device)
+        model.eval()
+        return model
+    
+    def generate_text(
+        self, 
+        prompt: str, 
+        max_length: int = 100,
+        temperature: float = 0.8,
+        top_k: int = 40,
+        top_p: float = 0.9,
+        num_return_sequences: int = 1
+    ) -> list:
+        """Generate text with various decoding strategies"""
+        
+        results = []
+        
+        for _ in range(num_return_sequences):
+            # Encode prompt
+            input_ids = torch.tensor([self.tokenizer.encode(prompt)]).to(self.device)
+            
+            with torch.no_grad():
+                generated = input_ids.clone()
+                
+                for step in range(max_length):
+                    # Forward pass
+                    outputs = self.model(generated)
+                    logits = outputs[0, -1, :] / temperature
+                    
+                    # Top-k filtering
+                    if top_k > 0:
+                        top_k_logits, top_k_indices = torch.topk(logits, top_k)
+                        logits = torch.full_like(logits, -float('inf'))
+                        logits[top_k_indices] = top_k_logits
+                    
+                    # Top-p (nucleus) sampling
+                    if top_p < 1.0:
+                        sorted_logits, sorted_indices = torch.sort(logits, descending=True)
+                        cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
+                        
+                        # Remove tokens with cumulative probability above threshold
+                        sorted_indices_to_remove = cumulative_probs > top_p
+                        sorted_indices_to_remove[1:] = sorted_indices_to_remove[:-1].clone()
+                        sorted_indices_to_remove[0] = 0
+                        
+                        indices_to_remove = sorted_indices[sorted_indices_to_remove]
+                        logits[indices_to_remove] = -float('inf')
+                    
+                    # Sample next token
+                    probs = F.softmax(logits, dim=-1)
+                    next_token = torch.multinomial(probs, num_samples=1)
+                    
+                    # Append to sequence
+                    generated = torch.cat([generated, next_token.unsqueeze(0)], dim=1)
+                    
+                    # Check for end token or max length
+                    if next_token.item() == self.tokenizer.eos_token_id:
+                        break
+            
+            # Decode generated text
+            generated_text = self.tokenizer.decode(generated[0].tolist())
+            results.append(generated_text)
+        
+        return results
+    
+    def complete_text(self, prompt: str, max_length: int = 50) -> str:
+        """Simple text completion"""
+        generated = self.generate_text(
+            prompt, 
+            max_length=max_length, 
+            temperature=0.7,
+            top_k=50,
+            num_return_sequences=1
+        )
+        return generated[0]
+    
+    def answer_question(self, context: str, question: str) -> str:
+        """Answer questions based on context"""
+        prompt = f"Context: {context}\nQuestion: {question}\nAnswer:"
+        answer = self.generate_text(
+            prompt,
+            max_length=100,
+            temperature=0.3,  # Lower temperature for more factual responses
+            top_k=40,
+            num_return_sequences=1
+        )[0]
+        
+        # Extract just the answer part
+        if "Answer:" in answer:
+            return answer.split("Answer:")[-1].strip()
+        return answer
+    
+    def summarize_text(self, text: str, max_summary_length: int = 100) -> str:
+        """Summarize given text"""
+        prompt = f"Summarize the following text:\n\n{text}\n\nSummary:"
+        summary = self.generate_text(
+            prompt,
+            max_length=max_summary_length,
+            temperature=0.5,
+            top_k=50,
+            num_return_sequences=1
+        )[0]
+        
+        if "Summary:" in summary:
+            return summary.split("Summary:")[-1].strip()
+        return summary
+
+# Example usage of different applications
+def demonstrate_applications():
+    """Demonstrate various GPT applications"""
+    
+    print("=== GPT Applications Demo ===\n")
+    
+    # Note: This would require a real trained model
+    # gpt = GPTInference('path/to/model.pt')
+    
+    # 1. Text Generation
+    print("1. Creative Text Generation:")
+    prompt = "Once upon a time, in a distant galaxy"
+    print(f"Prompt: {prompt}")
+    print("Generated: [Would generate creative story continuation]\n")
+    
+    # 2. Code Generation
+    print("2. Code Generation:")
+    code_prompt = "def fibonacci(n):\n    # Generate fibonacci sequence"
+    print(f"Prompt: {code_prompt}")
+    print("Generated: [Would generate Python code]\n")
+    
+    # 3. Question Answering
+    print("3. Question Answering:")
+    context = "The GPT model uses transformer architecture with self-attention."
+    question = "What architecture does GPT use?"
+    print(f"Context: {context}")
+    print(f"Question: {question}")
+    print("Answer: [Would extract relevant answer]\n")
+    
+    # 4. Text Summarization
+    print("4. Text Summarization:")
+    long_text = "Long article about climate change and its effects..."
+    print("Input: [Long article text]")
+    print("Summary: [Would generate concise summary]")
+
+demonstrate_applications()
+</pre>
+                    </div>
+
+                    <div class="interactive-demo">
+                        <h4>🎯 Try GPT Applications:</h4>
+                        <select id="app-type">
+                            <option value="generation">Text Generation</option>
+                            <option value="completion">Text Completion</option>
+                            <option value="qa">Question Answering</option>
+                            <option value="summary">Summarization</option>
+                        </select>
+                        <input type="text" class="demo-input" id="app-input" placeholder="Enter your prompt...">
+                        <button class="nav-btn" onclick="demonstrateApplication()">Generate</button>
+                        <div class="demo-output" id="app-output">Output will appear here...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="expandAll()">Expand All Steps</button>
+            <button class="nav-btn" onclick="collapseAll()">Collapse All Steps</button>
+            <button class="nav-btn" onclick="scrollToTop()">Back to Top</button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle step visibility
+        function toggleStep(stepNum) {
+            const content = document.getElementById(`content-${stepNum}`);
+            const toggle = document.getElementById(`toggle-${stepNum}`);
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                toggle.textContent = '▼';
+            } else {
+                content.classList.add('active');
+                toggle.textContent = '▲';
+            }
+        }
+
+        // Expand all steps
+        function expandAll() {
+            for (let i = 1; i <= 10; i++) {
+                const content = document.getElementById(`content-${i}`);
+                const toggle = document.getElementById(`toggle-${i}`);
+                content.classList.add('active');
+                toggle.textContent = '▲';
+            }
+        }
+
+        // Collapse all steps
+        function collapseAll() {
+            for (let i = 1; i <= 10; i++) {
+                const content = document.getElementById(`content-${i}`);
+                const toggle = document.getElementById(`toggle-${i}`);
+                content.classList.remove('active');
+                toggle.textContent = '▼';
+            }
+        }
+
+        // Scroll to top
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Demonstrate tokenization
+        function demonstrateTokenization() {
+            const input = document.getElementById('tokenize-input').value;
+            const output = document.getElementById('tokenize-output');
+            
+            // Simple tokenization simulation
+            const tokens = input.toLowerCase().match(/\w+|[^\w\s]/g) || [];
+            
+            output.innerHTML = `
+                <strong>Input:</strong> "${input}"<br>
+                <strong>Tokens:</strong> [${tokens.map(t => `"${t}"`).join(', ')}]<br>
+                <strong>Token Count:</strong> ${tokens.length}
+            `;
+        }
+
+        // Demonstrate sampling strategies
+        function demonstrateSampling() {
+            const strategy = document.getElementById('sampling-strategy').value;
+            const output = document.getElementById('sampling-output');
+            
+            // Simulate model predictions
+            const vocab = ['the', 'cat', 'sat', 'on', 'mat', 'dog', 'ran', 'quickly', 'home', 'happy'];
+            const logits = [3.2, 2.8, 2.1, 1.5, 1.2, 0.8, 0.5, 0.3, 0.1, -0.2];
+            
+            let result = '';
+            
+            switch(strategy) {
+                case 'greedy':
+                    const maxIdx = logits.indexOf(Math.max(...logits));
+                    result = `<strong>Greedy Selection:</strong> "${vocab[maxIdx]}" (highest probability)<br>
+                             <strong>Logits:</strong> ${logits.slice(0, 5).join(', ')}...`;
+                    break;
+                    
+                case 'temperature':
+                    result = `<strong>Temperature Sampling (T=0.8):</strong><br>
+                             Original: [${logits.slice(0, 3).join(', ')}...]<br>
+                             Scaled: [${logits.slice(0, 3).map(x => (x/0.8).toFixed(1)).join(', ')}...]<br>
+                             <strong>Sampled:</strong> "${vocab[1]}" (probabilistic choice)`;
+                    break;
+                    
+                case 'top-k':
+                    result = `<strong>Top-k Sampling (k=3):</strong><br>
+                             Top tokens: ["${vocab[0]}", "${vocab[1]}", "${vocab[2]}"]<br>
+                             <strong>Sampled:</strong> "${vocab[0]}" (from top-k only)`;
+                    break;
+            }
+            
+            output.innerHTML = result;
+        }
+
+        // Demonstrate applications
+        function demonstrateApplication() {
+            const appType = document.getElementById('app-type').value;
+            const input = document.getElementById('app-input').value;
+            const output = document.getElementById('app-output');
+            
+            if (!input.trim()) {
+                output.innerHTML = '<em>Please enter a prompt</em>';
+                return;
+            }
+            
+            let result = '';
+            
+            switch(appType) {
+                case 'generation':
+                    result = `<strong>Creative Generation:</strong><br>
+                             Input: "${input}"<br>
+                             Generated: "${input} and the adventure began with unexpected twists and magical encounters..."`;
+                    break;
+                    
+                case 'completion':
+                    result = `<strong>Text Completion:</strong><br>
+                             Input: "${input}"<br>
+                             Completed: "${input} with careful consideration of all the important factors."`;
+                    break;
+                    
+                case 'qa':
+                    result = `<strong>Question Answering:</strong><br>
+                             Question: "${input}"<br>
+                             Answer: "Based on the context, this relates to transformer architecture and self-attention mechanisms."`;
+                    break;
+                    
+                case 'summary':
+                    result = `<strong>Summarization:</strong><br>
+                             Input: "${input}"<br>
+                             Summary: "Key points: ${input.split(' ').slice(0, 3).join(' ')}... [concise summary]"`;
+                    break;
+            }
+            
+            output.innerHTML = result;
+        }
+
+        // Initialize with first step expanded
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleStep(1);
+        });
+    </script>
+</body>
+</html>
